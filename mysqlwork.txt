@@ -1,0 +1,294 @@
+﻿create database testone;
+CREATE USER 'test'@'%' IDENTIFIED BY '123698745';
+use testone
+grant all privileges on testone to 'test'@'%';
+
+
+
+
+
+
+create table 班级表(
+ cid char(20) not null ,
+ Caption char not null,
+ primary key(Caption),
+FOREIGN KEY(cid) REFERENCES 成绩表 (Course_id)
+ )engine=InnoDB;
+
+CREATE TABLE 老师表( 
+ tid INT not NULL AUTO_INCREMENT ,
+ tname CHAR(20)  NOT NULL ,
+ PRIMARY KEY (tid))
+ ENGINE = InnoDB;
+ 
+ CREATE TABLE 课程表( 
+ cid char(20) not null,
+ Cname CHAR(20)  NOT NULL ,
+ Teacher_id int not null,
+ PRIMARY KEY (Cname),
+ FOREIGN KEY(cid) REFERENCES 老师表 (tname))
+ ENGINE = InnoDB;
+ 
+ CREATE TABLE 成绩表( 
+sid char(20) not null,
+ Student_id int not null,
+ Course_id char(20) not null,
+ number int not null,
+ primary key(Student_id),
+ FOREIGN KEY(sid) REFERENCES 课程表 (Cname)
+)engine=InnoDB;
+
+create table 学生表(
+sid char(20) not null,
+ Sname char(20) not null,
+Gender char(20) not null,
+Class_id int not null,
+primary key(Sname),
+FOREIGN KEY(sid) REFERENCES 成绩表 (Student_id)
+)engine=InnoDB;
+
+
+
+INSERT INTO `成绩表` 
+(`sid`, `Student_id`, `Course_id`, `number`)
+ VALUES (1,'10086','1','100'),
+ ('2','10087','2','90'), 
+ ('3','10088','3','50'), 
+ ('1','10089','1','90'), 
+ ('2','10090','2','80'), 
+ ('3','10091','3','70'), 
+ ('1','10092','1','80'),
+ ('2','10093','2','100'),
+ ('3','10094','3','40'),
+ ('1','10095','1','90'),
+ ('2','10096','2','100'),
+ ('3','10097','3','0'),
+ ('1','10098','1','99'),
+ ('2','10099','2','60'),
+ ('3','10100','3','75'),
+ ('1','10101','1','80'),
+ ('2','10102','2','30'),
+ ('3','10103','3','20'),
+ ('1','10104','1','100'),
+ ('2','10105','2','100'); 
+
+
+INSERT INTO `学生表` 
+(`sid`, `Sname`, `Gender`, `class_id`)
+ VALUES (1,'黑百合','女','1'),
+ ('2','麦克雷','男','1'), 
+ ('3','艾什','女','1'), 
+ ('4','死神','男','1'), 
+ ('5','半藏','男','1'), 
+ ('6','小美','女','1'), 
+ ('7','莫伊拉','女','1'),
+ ('8','裂空','女','1'),
+ ('9','士兵','男','1'),
+ ('10','托比昂','男','1'),
+ ('11','温斯顿','男','2'),
+ ('12','莱因哈特','男','2'),
+ ('13','哈蒙德','未知','2'),
+ ('14','查莉娅','女','2'),
+ ('15','宋哈娜','女','2'),
+ ('16','天使','女','3'),
+ ('17','安娜','女','3'),
+ ('18','DJ','男','3'),
+ ('19','禅雅塔','未知','3'),
+ ('20','奶兵','男','3'); 
+
+ 
+ 
+ INSERT INTO `课程表` 
+(`cid`, `Cname`, `teacher_id`)
+ VALUES ('1','生物','1'),
+ ('2','体育','2'), 
+ ('3','物理','3');
+ 
+  INSERT INTO `班级表` 
+(`cid`, `Caption`)
+ VALUES ('1','1'),
+ ('2','2'), 
+ ('3','3');
+ 
+ INSERT INTO `老师表` 
+(`tid`, `tname`)
+ VALUES (null,'李迪'),
+ (null,'王启'), 
+ (null,'孙松');
+ 
+ 
+ alter table testone add constraint fid foreign key
+ 
+ 3
+>
+ select Sname,Class_id from 学生表 
+ where sid in (
+ SELECT Student_id from 成绩表  
+ where Student_id != 10086&&Course_id = 1)
+
+4
+>
+
+
+5
+>
+
+select Course_id,max(number),min(number) from 成绩表 group by Course_id
+
+
+6
+>
+select Course_id,AVG(number) FROM 成绩表 group by Course_id order by AVG(number)
+
+
+select Course_id,100*sum(case
+ when number>=60
+ then 1 else 0
+ end)/count(*)
+from 成绩表 group by Course_id;
+
+
+7
+>
+select tname from 老师表 where tid in( 
+select Course_id FROM 成绩表 group by Course_id order by AVG(number) desc)
+
+
+8
+>
+(select Course_id,Student_id,number from 成绩表 where(Course_id = 1)
+ order by number desc limit 3) 
+ UNION 
+ (select Course_id,Student_id,number from 成绩表 where(Course_id = 2) 
+ order by number desc limit 3) 
+ UNION 
+ (select Course_id,Student_id,number from 成绩表 where(Course_id = 3)
+ order by number desc limit 3)
+
+
+9
+>
+select Course_id,count(1) from 成绩表 group by Course_id
+
+
+10**
+>
+
+ select Sname,Student_id from 学生表 left join 成绩表 
+ on (学生表.sid = 成绩表.Student_id) 
+ group by student_id having count(Course_id) = 1
+
+ 11
+ >
+ select count(Gender) from 学生表 group by Gender
+
+12
+>
+ select Sname from 学生表 where Sname like '张%'
+ 
+ 
+ 13
+ >
+ select Sname,count(*) from 学生表
+ where Sname in (
+ select Sname from 学生表
+ group by Sname
+ having(count(*))>1
+)
+
+14
+> 
+select Course_id,AVG(number) FROM 成绩表 
+group by Course_id order by 2,Course_id DESC
+
+
+15
+>
+select Sname,Student_id,AVG(number) from 学生表 left join 成绩表 
+on (学生表.sid = 成绩表.Student_id) 
+group by Sname having AVG(number)>85
+
+16
+>
+select Sname,number from 学生表 left join 成绩表 
+on (学生表.sid = 成绩表.Student_id) where Course_id in (
+select cid from 课程表 where Cname='体育')
+
+
+17
+>
+select Sname,Student_id from 学生表 left join 成绩表 
+on (学生表.sid = 成绩表.Student_id) 
+where Course_id = 3 and number>80
+
+18**
+>
+select Sname,max(number) from 学生表 left join 成绩表
+on (学生表.sid = 成绩表.Student_id) 
+where Course_id in (
+select tid from 老师表 where tname='李迪')
+UNION
+select Sname,max(number) from 学生表 right join 成绩表
+on (学生表.sid = 成绩表.Student_id) 
+where Course_id in (
+select tid from 老师表 where tname='李迪')
+
+
+
+19
+>
+
+select Cname,count(Course_id)from 课程表 right join 成绩表 
+on (课程表.Cname=成绩表.sid) group by Course_id
+
+
+
+20
+>
+select Student_id,Course_id,number from 成绩表 
+where number in (select number from 成绩表 
+group by number having count(*)>1)
+
+
+21
+>
+(select Course_id,Student_id,number from 成绩表 where(Course_id = 1)
+ order by number desc limit 2) 
+ UNION 
+ (select Course_id,Student_id,number from 成绩表 where(Course_id = 2) 
+ order by number desc limit 2) 
+ UNION 
+ (select Course_id,Student_id,number from 成绩表 where(Course_id = 3)
+ order by number desc limit 2)
+ 
+ 
+ 22
+ >
+ select Student_id from 成绩表 group by Student_id having count(Course_id)>1
+ 
+ 
+ 23
+ >
+ select Course_id,Cname from 课程表 right join 成绩表 
+ on (课程表.Cname=成绩表.sid)
+ group by Course_id having count(Course_id)=count(Student_id)
+ 
+ 
+ 
+ 24**
+ >
+ select Student_id,AVG(number) from 成绩表 where 
+ 
+ 
+ 25
+ >
+ select Student_id from 成绩表 
+ where (Course_id=2 and number<60) order by number desc
+ 
+ 
+ 26
+ >
+update 成绩表 set number = null 
+where (Course_id=1 and Student_id = 10087)
+
+
